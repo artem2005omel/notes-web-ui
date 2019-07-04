@@ -3,6 +3,7 @@ import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
+import NoteWindow from "./NoteWindow";
 
 
 export default class Note extends React.Component {
@@ -11,7 +12,7 @@ export default class Note extends React.Component {
 
 		const st = {
 			paper: {
-				backgroundColor: 'yellow',
+				backgroundColor: 'rgb(170,200,88)',
 				borderRadius: 5,
 				padding: 10,
 				width: '50%',
@@ -26,12 +27,10 @@ export default class Note extends React.Component {
 				fontStyle: 'italic',
 				wordBreak: 'break-all'
 			}
-		}
+		};
 
-		return (<Card style={st.paper}>
-				<CardHeader>
-					<Typography variant="h6">{this.props.note.title}</Typography>
-				</CardHeader>
+		return (<Card elevation={5} style={st.paper}>
+				<CardHeader title={this.props.note.title}/>
 				<CardContent>
 					<Typography variant="subheading">{this.props.note.content}</Typography>
 				</CardContent>
