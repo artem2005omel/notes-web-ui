@@ -11,27 +11,30 @@ export default class NoteWindow extends React.Component{
 
 	render(){
 		return (<Dialog open={this.props.open} onClose={this.props.onCancel} aria-labelledby="form-dialog-title">
-			<DialogTitle id="form-dialog-title">Subscribe</DialogTitle>
+			<DialogTitle id="form-dialog-title">{this.props.edit ? 'Edit' : 'Create'} Note</DialogTitle>
 			<DialogContent>
-				<DialogContentText>
-					To subscribe to this website, please enter your email address here. We will send updates
-					occasionally.
-				</DialogContentText>
 				<TextField
 					autoFocus
-					margin="dense"
-					id="name"
-					label="Email Address"
-					type="email"
+					label="Title"
 					fullWidth
+					value={this.props.currentNote.title}
+					onChange={e => this.props.onTitleChange(e.target.value)}
+				/>
+				<TextField
+					multiline
+					rowsMax={10}
+					label="Content"
+					fullWidth
+					value={this.props.currentNote.content}
+					onChange={e => this.props.onContentChange(e.target.value)}
 				/>
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={this.props.onCancel} color="primary">
 					Cancel
 				</Button>
-				<Button onClick={this.props.onCancel} color="primary">
-					Subscribe
+				<Button onClick={this.props.onSave} color="primary">
+					{this.props.edit ? 'Save' : 'Create'}
 				</Button>
 			</DialogActions>
 		</Dialog>);
