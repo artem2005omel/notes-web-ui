@@ -4,22 +4,32 @@ import NoteWindow from './NoteWindow';
 import IconButton from "@material-ui/core/IconButton";
 import PlusIcon from "@material-ui/icons/Add";
 import Fab from "@material-ui/core/Fab";
+import Grow from "@material-ui/core/Grow";
+import Fade from "@material-ui/core/Fade";
+import {withSnackbar} from "notistack";
 
-export default class App extends React.Component {
+class App extends React.Component {
 
     state = {
+        edit: false,
+        added: false,
         notes: [
             {
+                id: 0,
                 title: 'some title',
-                content: 'lalalalalla'
+                content: 'lalalalalla',
+                timestamp: Date.now()
             },
             {
+                id: 1,
                 title: 'another',
-                content: 'some conteeeeeent'
+                content: 'some conteeeeeent',
+                timestamp: Date.now()
             }
         ],
         showNoteWindow: false,
         currentNote: {
+            id: 2,
             title: '',
             content: '',
         }
@@ -31,7 +41,16 @@ export default class App extends React.Component {
         })
     };
 
+    addSnack = message => this.addSnackbar(message, {variant: 'default'});
+    addSuccessSnack = message => this.addSnackbar(message, {variant: 'success'});
+    addInfoSnack = message => this.addSnackbar(message, {variant: 'info'});
+    addWarningSnack = message => this.addSnackbar(message, {variant: 'warning'});
+    addErrorSnack = message => this.addSnackbar(message, {variant: 'error'});
+
+    addSnackbar = (message, options) => this.props.enqueueSnackbar(message, options);
+
     render() {
+        const {added, notes, showNoteWindow, currentNote, edit} = this.state;
 
         const st = {
             page: {
@@ -52,32 +71,61 @@ export default class App extends React.Component {
 
         return (<div style={st.page}>
             <div style={st.buttonContainer}>
-                <Fab onClick={() => this.setState({showNoteWindow: true})} style={st.addButton}>
+                <Fab onClick={() => this.setState({showNoteWindow: true, edit: false})} style={st.addButton}>
                     <PlusIcon/>
                 </Fab>
             </div>
 
-            {this.state.notes.map(note => <Note note={note}/>)}
+            {notes.map((note, index) => <Note
+                onRemove={() => this.setState({notes: notes.filter((n, i) => i !== index)})}
+                onEdit={() => this.setState({
+                    showNoteWindow: true,
+                    edit: true,
+                    currentNote: JSON.parse(JSON.stringify(note))
+                })}
+                grow={added ? index === 0 : true}
+                note={note}/>).reverse()}
             <NoteWindow
-                open={this.state.showNoteWindow}
-                onTitleChange={title => this.setState({currentNote: {...this.state.currentNote, title}})}
-                onContentChange={content => this.setState({currentNote: {...this.state.currentNote, content}})}
+                edit={this.state.edit}
+                open={showNoteWindow}
+                currentNote={currentNote}
+                onTitleChange={title => this.setState({currentNote: {...currentNote, title}})}
+                onContentChange={content => this.setState({currentNote: {...currentNote, content}})}
                 onCancel={() => this.setState({
                     showNoteWindow: false,
                     currentNote: {
+                        id: notes.length,
                         title: '',
                         content: '',
                     }
                 })}
-                onSave={() => this.setState({
-                    showNoteWindow: false,
-                    notes: [...this.state.notes, this.state.currentNote],
-                    currentNote: {
-                        title: '',
-                        content: '',
+                onSave={() => {
+                    if (currentNote.title.length === 0)
+                        this.addWarningSnack("Fill title field, please!");
+                    else {
+                        let newNotes = JSON.parse(JSON.stringify(notes));
+                        if(edit) {
+                            const noteIndx = newNotes.findIndex(n => n.id === currentNote.id);
+                            newNotes.splice(noteIndx, 1, currentNote);
+                        }
+                        else
+                            newNotes = [...newNotes, {...currentNote, timestamp: Date.now()}];
+                        this.setState({
+                            added: true,
+                            showNoteWindow: false,
+                            notes: newNotes,
+                            currentNote: {
+                                id: notes.length,
+                                title: '',
+                                content: '',
+                            }
+                        });
+                        this.addSuccessSnack("Note successfullt created!");
                     }
-                })}
+                }}
             />
         </div>);
     }
 }
+
+export default withSnackbar(App);
